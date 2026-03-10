@@ -1,0 +1,10 @@
+fastapi==0.135.0
+uvicorn==0.41.0
+starlette==0.52.1
+scikit-learn==1.8.0
+joblib==1.5.3
+numpy==2.4.2
+scapy==2.7.0
+pydantic==2.12.5
+shap==0.50.0
+websockets==16.0
