@@ -1,9 +1,5 @@
 import { useState } from 'react'
 
-const ATTACK_TYPES = [
-  'Analysis', 'Backdoor', 'DoS', 'Exploits',
-  'Fuzzers', 'Generic', 'Reconnaissance', 'Shellcode', 'Worms',
-]
 
 export default function Filters({ params, onApply }) {
   const [search, setSearch] = useState(params.search)
@@ -58,18 +54,6 @@ export default function Filters({ params, onApply }) {
           </button>
         ))}
       </div>
-
-      {/* Attack type dropdown */}
-      <select
-        className="filter-select"
-        value={params.attack_type}
-        onChange={handleAttackType}
-      >
-        <option value="">All attack types</option>
-        {ATTACK_TYPES.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
-      </select>
 
       {/* IP filter */}
       <input

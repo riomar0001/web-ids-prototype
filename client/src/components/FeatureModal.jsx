@@ -40,7 +40,6 @@ export default function FeatureModal({ entry, onClose }) {
             >
               {entry.binary_classification}
             </span>
-            {entry.attack_type && ` — ${entry.attack_type}`}
           </p>
         </div>
 

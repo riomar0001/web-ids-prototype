@@ -31,7 +31,6 @@ export default function LogTable({ logs, loading }) {
               <th>Client IP</th>
               <th>Endpoint</th>
               <th>Classification</th>
-              <th>Attack Type</th>
               <th>Features</th>
             </tr>
           </thead>
@@ -70,7 +69,6 @@ export default function LogTable({ logs, loading }) {
                         {entry.binary_classification}
                       </span>
                     </td>
-                    <td>{entry.attack_type || '—'}</td>
                     <td>
                       <button
                         className="btn-features"
