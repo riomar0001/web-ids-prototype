@@ -23,9 +23,9 @@ FEATURE_NAMES: list[str] = json.loads((MODEL_DIR / "feature_names.json").read_te
 WEB_PORTS: set[int] = {80, 443, 8080, 8443, 8000, 8888, 3000, 5000}
 
 # Duration (seconds) for Scapy to sniff packets per request.
-# Must exceed the longest expected server response delay — time-based SQL injection
-# payloads (e.g. PG_SLEEP(5), WAITFOR DELAY '0:0:5') hold the connection for 5 s.
-SNIFF_TIMEOUT: float = 8.0
+# Sniffing stops early when a TCP FIN/RST is seen; this timeout is the hard cap
+# for flows that never cleanly close (e.g. stalled connections, UDP).
+SNIFF_TIMEOUT: float = 2.0
 
 # URL path prefixes that are excluded from IDS analysis.
 # These are internal/monitoring endpoints only ever called by the dashboard

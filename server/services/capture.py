@@ -34,6 +34,12 @@ class PacketCapture:
         )
         self._thread.start()
 
+    @staticmethod
+    def _tcp_fin_rst(pkt) -> bool:
+        """Return True when a FIN or RST flag is set — used to stop sniffing early."""
+        from scapy.layers.inet import TCP
+        return pkt.haslayer(TCP) and bool(pkt[TCP].flags & 0x05)  # FIN=0x01, RST=0x04
+
     def _sniff(self, bpf: str) -> None:
         try:
             self.packets = sniff(
@@ -41,6 +47,7 @@ class PacketCapture:
                                 # accidentally capturing loopback or other ifaces
                 filter=bpf,
                 timeout=SNIFF_TIMEOUT,
+                stop_filter=self._tcp_fin_rst,
                 store=True,
             )
         except Exception as exc:

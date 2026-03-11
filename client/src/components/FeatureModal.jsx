@@ -20,13 +20,15 @@ export default function FeatureModal({ entry, onClose }) {
 
         <div className="modal-meta">
           <p>
-            <strong>Endpoint:</strong>{' '}
-            {entry.method && (
-              <span className={`badge badge-method badge-${entry.method.toLowerCase()}`} style={{ marginRight: '6px' }}>
-                {entry.method}
-              </span>
-            )}
-            <span style={{ wordBreak: 'break-all' }}>{entry.endpoint}</span>
+            <strong>Endpoint:</strong>
+            <span className="modal-endpoint">
+              {entry.method && (
+                <span className={`badge badge-method badge-${entry.method.toLowerCase()}`}>
+                  {entry.method}
+                </span>
+              )}
+              <span style={{ wordBreak: 'break-all' }}>{entry.endpoint}</span>
+            </span>
           </p>
           <p>
             <strong>Client IP:</strong> {entry.client_ip}

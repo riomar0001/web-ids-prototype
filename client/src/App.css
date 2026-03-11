@@ -638,6 +638,17 @@ tbody tr:hover {
   color: var(--text-muted);
 }
 
+.modal-endpoint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
 .modal-meta strong {
   color: var(--text);
 }
