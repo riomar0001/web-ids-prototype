@@ -37,7 +37,7 @@ class PacketCapture:
     def _sniff(self, bpf: str) -> None:
         try:
             self.packets = sniff(
-                iface="eth0",   # Docker container's primary interface; avoids
+                iface="ens33",   # Docker container's primary interface; avoids
                                 # accidentally capturing loopback or other ifaces
                 filter=bpf,
                 timeout=SNIFF_TIMEOUT,
