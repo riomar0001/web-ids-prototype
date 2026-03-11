@@ -61,9 +61,7 @@ export default function LogTable({ logs, loading }) {
                     <td>
                       <span
                         className={`badge ${
-                          entry.binary_classification === 'Attack'
-                            ? 'badge-attack'
-                            : 'badge-normal'
+                          entry.binary_classification === 'Attack' ? 'badge-attack' : 'badge-normal'
                         }`}
                       >
                         {entry.binary_classification}

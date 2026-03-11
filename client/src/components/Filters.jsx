@@ -6,11 +6,7 @@ export default function Filters({ params, onApply }) {
   const [clientIp, setClientIp] = useState(params.client_ip)
 
   function handleClassification(value) {
-    onApply({ classification: value, attack_type: '' })
-  }
-
-  function handleAttackType(e) {
-    onApply({ attack_type: e.target.value, classification: e.target.value ? 'Attack' : '' })
+    onApply({ classification: value })
   }
 
   function handleSearch(e) {
@@ -30,11 +26,11 @@ export default function Filters({ params, onApply }) {
   function handleClear() {
     setSearch('')
     setClientIp('')
-    onApply({ classification: '', attack_type: '', search: '', client_ip: '' })
+    onApply({ classification: '', search: '', client_ip: '' })
   }
 
   const hasFilters =
-    params.classification || params.attack_type || params.search || params.client_ip
+    params.classification || params.search || params.client_ip
 
   return (
     <div className="filters-bar">
@@ -47,7 +43,7 @@ export default function Filters({ params, onApply }) {
         ].map(({ label, value }) => (
           <button
             key={label}
-            className={`filter-btn ${params.classification === value && !params.attack_type ? 'active' : ''}`}
+            className={`filter-btn ${params.classification === value ? 'active' : ''}`}
             onClick={() => handleClassification(value)}
           >
             {label}

@@ -4,7 +4,7 @@ Health, status, and log inspection endpoints.
 
 from fastapi import APIRouter, Query
 
-from server.config import ATTACK_LABELS, FEATURE_NAMES
+from server.config import FEATURE_NAMES
 from server.utils.logging import read_log
 from server.utils.stats import compute_stats
 
@@ -25,9 +25,7 @@ async def health():
         "status": "healthy",
         "models_loaded": True,
         "binary_model": "rf_model.joblib",
-        "multiclass_model": "rf_multiclass.joblib",
         "feature_count": len(FEATURE_NAMES),
-        "attack_labels": ATTACK_LABELS,
     }
 
 
@@ -53,10 +51,6 @@ async def get_logs(
         None,
         description="Filter by binary result: 'Normal' or 'Attack'",
     ),
-    attack_type: str | None = Query(
-        None,
-        description="Filter by attack type, e.g. 'DoS'",
-    ),
     client_ip: str | None = Query(
         None,
         description="Filter by exact client IP address",
@@ -76,9 +70,6 @@ async def get_logs(
     # ── Filters ──────────────────────────────────────────────
     if classification:
         logs = [e for e in logs if e["binary_classification"] == classification]
-
-    if attack_type:
-        logs = [e for e in logs if e.get("attack_type") == attack_type]
 
     if client_ip:
         logs = [e for e in logs if e["client_ip"] == client_ip]

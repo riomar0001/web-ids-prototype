@@ -7,7 +7,6 @@ const DEFAULT_PARAMS = {
   page_size: 20,
   sort: 'desc',
   classification: '',
-  attack_type: '',
   client_ip: '',
   search: '',
 }

@@ -7,8 +7,6 @@ const EMPTY = {
   total_attacks: 0,
   total_normal: 0,
   unique_ips: 0,
-  top_attack_type: null,
-  attack_type_counts: {},
 }
 
 export function useStats(pollInterval = 5000) {

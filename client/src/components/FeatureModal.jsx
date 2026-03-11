@@ -4,12 +4,15 @@ export default function FeatureModal({ entry, onClose }) {
   const features = entry.features || {}
   const explanation = entry.explanation || []
   const maxAbs = explanation.reduce((m, e) => Math.max(m, Math.abs(e.shap_value)), 0) || 1
+  const req = entry.request || {}
+  const headers = req.headers || {}
+  const body = req.body || null
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Feature Details</h2>
+          <h2>Request Details</h2>
           <button className="modal-close" onClick={onClose}>
             &times;
           </button>
@@ -23,7 +26,7 @@ export default function FeatureModal({ entry, onClose }) {
                 {entry.method}
               </span>
             )}
-            {entry.endpoint}
+            <span style={{ wordBreak: 'break-all' }}>{entry.endpoint}</span>
           </p>
           <p>
             <strong>Client IP:</strong> {entry.client_ip}
@@ -41,6 +44,30 @@ export default function FeatureModal({ entry, onClose }) {
               {entry.binary_classification}
             </span>
           </p>
+        </div>
+
+        {/* ── Request section ── */}
+        <div className="request-section">
+          <h3 className="request-section-title">Headers</h3>
+          {Object.keys(headers).length === 0 ? (
+            <p className="request-empty">No headers captured.</p>
+          ) : (
+            <div className="request-headers">
+              {Object.entries(headers).map(([k, v]) => (
+                <div key={k} className="request-header-row">
+                  <span className="request-header-name">{k}</span>
+                  <span className="request-header-value">{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <h3 className="request-section-title" style={{ marginTop: '16px' }}>Body</h3>
+          {body ? (
+            <pre className="request-body">{body}</pre>
+          ) : (
+            <p className="request-empty">No body.</p>
+          )}
         </div>
 
         {explanation.length === 0 && (

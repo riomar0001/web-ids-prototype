@@ -16,7 +16,6 @@ LOG_FILE = APP_DIR.parent / "ids_log.json"         # .../ids_log.json
 # Model metadata (loaded once at import time)
 # ---------------------------------------------------------------------------
 FEATURE_NAMES: list[str] = json.loads((MODEL_DIR / "feature_names.json").read_text())
-ATTACK_LABELS: list[str] = json.loads((MODEL_DIR / "attack_labels.json").read_text())
 
 # ---------------------------------------------------------------------------
 # Network / detection settings

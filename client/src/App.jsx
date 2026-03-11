@@ -1,7 +1,6 @@
 import { useLogs } from './hooks/useLogs'
 import { useStats } from './hooks/useStats'
 import StatsBar from './components/StatsBar'
-import AttackBreakdown from './components/AttackBreakdown'
 import Filters from './components/Filters'
 import LogTable from './components/LogTable'
 import Pagination from './components/Pagination'
@@ -27,7 +26,6 @@ export default function App() {
       </header>
 
       <StatsBar stats={stats} loaded={statsLoaded} />
-      <AttackBreakdown stats={stats} />
 
       <div className="table-section">
         <div className="table-header">

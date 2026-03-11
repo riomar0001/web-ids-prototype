@@ -16,11 +16,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from server.config import EXCLUDED_PATH_PREFIXES
 from server.services.capture import PacketCapture
-from server.services.classifier import ClassificationResult, IDSClassifier
+from server.services.classifier import IDSClassifier
 from server.services.features import extract_features
 from server.utils.logging import log_detection
 
 logger = logging.getLogger("ids")
+
+# Maximum body bytes to store in the log (avoids huge log entries for file uploads, etc.)
+MAX_BODY_LOG_BYTES = 4096
 
 
 class IDSMiddleware(BaseHTTPMiddleware):
@@ -43,6 +46,18 @@ class IDSMiddleware(BaseHTTPMiddleware):
         if request.url.path.startswith(EXCLUDED_PATH_PREFIXES):
             return await call_next(request)
 
+        # Capture headers before forwarding the request.
+        headers = dict(request.headers)
+
+        # Read the body; Starlette caches it so downstream handlers still receive it.
+        raw_body = await request.body()
+        if len(raw_body) > MAX_BODY_LOG_BYTES:
+            body_log: str | None = raw_body[:MAX_BODY_LOG_BYTES].decode("utf-8", errors="replace") + f" … [{len(raw_body)} bytes total, truncated]"
+        elif raw_body:
+            body_log = raw_body.decode("utf-8", errors="replace")
+        else:
+            body_log = None
+
         # Start packet capture in a background thread
         capture = PacketCapture(client_ip, server_port)
         capture.start()
@@ -62,7 +77,7 @@ class IDSMiddleware(BaseHTTPMiddleware):
         # don't block the async event loop.
         threading.Thread(
             target=self._classify_and_log,
-            args=(capture.packets, client_ip, server_port, method, endpoint),
+            args=(capture.packets, client_ip, server_port, method, endpoint, headers, body_log),
             daemon=True,
         ).start()
 
@@ -75,6 +90,8 @@ class IDSMiddleware(BaseHTTPMiddleware):
         server_port: int,
         method: str,
         endpoint: str,
+        headers: dict[str, str],
+        body: str | None,
     ) -> None:
         """Extract features, classify, and persist the detection result."""
         if not packets:
@@ -83,29 +100,31 @@ class IDSMiddleware(BaseHTTPMiddleware):
 
         try:
             features = extract_features(packets, client_ip, server_port)
-            result: ClassificationResult = self.classifier.classify(features)
+            result = self.classifier.classify(features)
 
             log_detection({
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "method": method,
                 "endpoint": endpoint,
                 "client_ip": client_ip,
+                "request": {
+                    "headers": headers,
+                    "body": body,
+                },
                 "features": {
                     k: round(v, 6) if isinstance(v, float) else v
                     for k, v in features.items()
                 },
                 "binary_classification": result.binary_label,
-                "attack_type": result.attack_type,
                 "explanation": result.explanation,
             })
 
             if result.binary_label == "Attack":
                 logger.warning(
-                    "ATTACK detected from %s — %s %s — type: %s",
+                    "ATTACK detected from %s — %s %s",
                     client_ip,
                     method,
                     endpoint,
-                    result.attack_type,
                 )
             else:
                 logger.info(

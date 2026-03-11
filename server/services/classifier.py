@@ -12,7 +12,7 @@ import joblib
 import numpy as np
 import shap
 
-from server.config import ATTACK_LABELS, FEATURE_NAMES, MODEL_DIR
+from server.config import FEATURE_NAMES, MODEL_DIR
 
 logger = logging.getLogger("ids")
 
@@ -23,20 +23,16 @@ TOP_N_FEATURES = 5
 @dataclass
 class ClassificationResult:
     binary_label: str                        # "Normal" or "Attack"
-    attack_type: str | None                  # e.g. "DoS", only set when binary == Attack
     explanation: list[dict] = field(default_factory=list)
     # [{"feature": "...", "value": ..., "shap_value": ...}, ...]
 
 
 class IDSClassifier:
-    """Wraps the two-stage Random Forest classification pipeline."""
+    """Wraps the binary Random Forest classification pipeline."""
 
     def __init__(self) -> None:
         logger.info("Loading binary classification model …")
         self.binary_model = joblib.load(MODEL_DIR / "rf_model.joblib")
-
-        logger.info("Loading multiclass classification model …")
-        self.multiclass_model = joblib.load(MODEL_DIR / "rf_multiclass.joblib")
 
         logger.info("Initialising SHAP explainer …")
         self.explainer = shap.TreeExplainer(self.binary_model)
@@ -45,11 +41,10 @@ class IDSClassifier:
 
     def classify(self, features: dict[str, float | int]) -> ClassificationResult:
         """
-        Run two-stage classification on extracted features.
+        Run binary classification on extracted features.
 
         1. Binary model → Normal / Attack
-        2. If Attack → multiclass model → specific attack type
-        3. SHAP → top-N feature contributions for the prediction
+        2. SHAP → top-N feature contributions for the prediction
         """
         feature_vector = np.array(
             [[features[name] for name in FEATURE_NAMES]]
@@ -58,24 +53,10 @@ class IDSClassifier:
         binary_pred = self.binary_model.predict(feature_vector)[0]
         binary_label = "Attack" if binary_pred == 1 else "Normal"
 
-        attack_type = None
-        if binary_pred == 1:
-            multi_pred = int(self.multiclass_model.predict(feature_vector)[0])
-            label = (
-                ATTACK_LABELS[multi_pred]
-                if multi_pred < len(ATTACK_LABELS)
-                else f"Unknown ({multi_pred})"
-            )
-            # If the multiclass model returns "Normal" while binary says Attack,
-            # the two models contradict — surface this as Unknown rather than
-            # mis-labelling a confirmed attack as benign.
-            attack_type = label if label != "Normal" else "Unknown"
-
         explanation = self._explain(feature_vector, features)
 
         return ClassificationResult(
             binary_label=binary_label,
-            attack_type=attack_type,
             explanation=explanation,
         )
 
